@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Navbar from "../components/navbar";
-import MateProfileForm from "../components/mate-profile";
+import MateProfileForm from "../components/mate_profile";
 
 const ProfilePage = () => {
   const [user, setUser] = useState<any>(null);

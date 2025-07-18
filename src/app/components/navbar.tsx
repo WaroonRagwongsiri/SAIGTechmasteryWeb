@@ -37,7 +37,7 @@ const Navbar = () => {
 	}, []);
 
 	const handleLogout = async () => {
-		await fetch("/api/logout", { method: "POST" }); // ✅ Clear cookie on server
+		await fetch("/api/logout", { method: "POST" });
 		setUser(null);
 		router.push("/");
 	};
