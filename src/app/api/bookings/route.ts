@@ -126,35 +126,50 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  const token = req.cookies.get("token")?.value;
-  if (!token) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	const token = req.cookies.get("token")?.value;
+	if (!token) {
+	  return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	}
+  
+	let userId: string;
+	let userRole: string;
+	try {
+	  const decoded = jwt.verify(token, process.env.JWT_SECRET!) as jwt.JwtPayload & { id: string, role: string };
+	  userId = decoded.id;
+	  userRole = decoded.role;
+	} catch {
+	  return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+	}
+  
+	const url = new URL(req.url);
+	const status = url.searchParams.get("status") as string | undefined;
+  
+	try {
+	  const whereClause: any = { ...(status && { status }) };
+  
+	  if (userRole === "RENTER") {
+		whereClause.renterId = userId;
+	  } else if (userRole === "MATE") {
+		whereClause.mateId = userId;
+	  }
+  
+	  const bookings = await prisma.booking.findMany({
+		where: whereClause,
+		include: {
+		  renter: {
+			select: { firstName: true, lastName: true }
+		  },
+		  mate: {
+			select: { firstName: true, lastName: true }
+		  }
+		},
+		orderBy: { createdAt: 'desc' }
+	  });
+  
+	  return NextResponse.json({ bookings });
+	} catch (error) {
+	  console.error("Error fetching bookings:", error);
+	  return NextResponse.json({ bookings: [] }, { status: 500 });
+	}
   }
-
-  let userId: string;
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as jwt.JwtPayload & { id: string };
-    userId = decoded.id;
-  } catch {
-    return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-  }
-
-  try {
-    const bookings = await prisma.booking.findMany({
-      where: {
-        renterId: userId
-      },
-      include: {
-        mate: true
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
-
-    return NextResponse.json({ bookings });
-  } catch (error) {
-    console.error("Error fetching bookings:", error);
-    return NextResponse.json({ bookings: [] }, { status: 500 });
-  }
-}
+  

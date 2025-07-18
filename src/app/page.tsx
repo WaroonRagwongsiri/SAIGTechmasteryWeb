@@ -24,7 +24,7 @@ export default function HomePage() {
   }, []);
 
   if (loading) return <div className="flex h-screen justify-center items-center text-center">Loading...</div>;
-  if (!user) return <div className="flex h-screen justify-center items-center text-center">Please login</div>;
+  if (!user) return <div><Navbar /><div className="flex h-full justify-center items-center text-center">Please login</div></div>;
 
   return (
     <div>

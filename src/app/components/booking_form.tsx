@@ -74,6 +74,7 @@ export default function BookingForm({ mateId, hourlyRate, mateName }: BookingFor
           mateId,
           ...formData
         }),
+		credentials : "include"
       });
 
       const data = await response.json();
