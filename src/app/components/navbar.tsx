@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import {
 	NavigationMenu,
@@ -14,12 +14,33 @@ import {
 const Navbar = () => {
 	const router = useRouter()
 
-	const user = null
+	const [user, setUser] = useState<any>(null);
 
-	const handleLogout = () => {
-		console.log("Logging out...")
-		router.push("/")
-	}
+
+	useEffect(() => {
+		const fetchUser = async () => {
+			try {
+				const res = await fetch("/api/me", {
+					method: "GET",
+					credentials: "include", // ⬅️ Required to include HttpOnly cookies
+				});
+				if (res.ok) {
+					const data = await res.json();
+					setUser(data.user);
+				}
+			} catch {
+				setUser(null);
+			}
+		};
+
+		fetchUser();
+	}, []);
+
+	const handleLogout = async () => {
+		await fetch("/api/logout", { method: "POST" }); // ✅ Clear cookie on server
+		setUser(null);
+		router.push("/");
+	};
 
 	return (
 		<div className="flex items-center justify-between px-6 py-4 shadow-sm bg-white">
@@ -39,7 +60,7 @@ const Navbar = () => {
 				<NavigationMenuList>
 					<NavigationMenuItem>
 						<NavigationMenuTrigger>Profile</NavigationMenuTrigger>
-						<NavigationMenuContent className="p-4 w-56">
+						<NavigationMenuContent className="p-4 w-56 overflow-auto right-0 left-auto">
 							{user ? (
 								<div className="space-y-2">
 									<div>
