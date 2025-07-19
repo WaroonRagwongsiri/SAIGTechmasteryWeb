@@ -10,35 +10,20 @@ import {
 	NavigationMenuList,
 	NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
+import { useAuthStore } from "@/stores/authStore"
 
 const Navbar = () => {
 	const router = useRouter()
-
-	const [user, setUser] = useState<any>(null);
-
+	const { user, fetchUser, logout } = useAuthStore();
 
 	useEffect(() => {
-		const fetchUser = async () => {
-			try {
-				const res = await fetch("/api/me", {
-					method: "GET",
-					credentials: "include", // ⬅️ Required to include HttpOnly cookies
-				});
-				if (res.ok) {
-					const data = await res.json();
-					setUser(data.user);
-				}
-			} catch {
-				setUser(null);
-			}
-		};
-
-		fetchUser();
-	}, []);
+		if (!user) {
+			fetchUser();
+		}
+	}, [user, fetchUser]);
 
 	const handleLogout = async () => {
-		await fetch("/api/logout", { method: "POST" });
-		setUser(null);
+		logout()
 		router.push("/");
 	};
 
@@ -61,8 +46,8 @@ const Navbar = () => {
 					<NavigationMenuList>
 						{user.role === "RENTER" && (
 							<NavigationMenuItem>
-								<NavigationMenuLink 
-									href="/bookings" 
+								<NavigationMenuLink
+									href="/bookings"
 									className="text-gray-700 hover:text-gray-900 hover:underline px-3 py-2 rounded-md text-sm font-medium"
 								>
 									My Bookings
