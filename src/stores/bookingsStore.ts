@@ -17,7 +17,7 @@ interface Booking {
   startTime: string;
   endTime: string;
   totalAmount?: number;
-  status: 'PENDING' | 'CONFIRMED' | 'PAYMENT_PENDING' | 'COMPLETED';
+  status: 'PENDING' | 'CONFIRMED' | 'PAYMENT_PENDING' | 'COMPLETED' | 'CANCELLED';
   createdAt?: string;
   renter: BookingRenter;
   mate?: BookingMate;

@@ -11,13 +11,13 @@ interface BookingDetailsMate {
 }
 
 interface BookingDetails {
-  id: number;
+  id: string; // Changed from number to string for MongoDB ObjectId
   activity: string;
   date: string;
   startTime: string;
   endTime: string;
   totalAmount: number;
-  status: 'PENDING' | 'CONFIRMED' | 'PAYMENT_PENDING' | 'COMPLETED';
+  status: 'PENDING' | 'CONFIRMED' | 'PAYMENT_PENDING' | 'COMPLETED' | 'CANCELLED';
   createdAt: string;
   renter: BookingDetailsRenter;
   mate: BookingDetailsMate;
@@ -105,4 +105,4 @@ export const useBookingDetailsStore = create<BookingDetailsStore>((set, get) => 
   clearBooking: () => {
     set({ booking: null, loading: true, error: null });
   },
-})); 
+}));
