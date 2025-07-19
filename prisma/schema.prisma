@@ -80,5 +80,7 @@ enum Role {
 enum BookingStatus {
 	PENDING
 	CONFIRMED
+	PAYMENT_PENDING
 	COMPLETED
+	CANCELLED
 }

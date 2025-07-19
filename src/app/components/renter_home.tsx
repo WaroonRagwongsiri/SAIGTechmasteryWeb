@@ -1,36 +1,44 @@
 "use client";
 import React, { useEffect, useState } from "react";
-
-type Mate = {
-  id: string;
-  userId: string;
-  bio?: string;
-  hourlyRate: number;
-  user: {
-    firstName: string;
-    lastName: string;
-    profilePhoto?: string;
-    dateOfBirth: string;
-  };
-};
+import { useMatesStore } from "@/stores";
 
 export default function RenterHome({ userId }: { userId: string }) {
-  const [mates, setMates] = useState<Mate[]>([]);
+  const [mates, setMates] = useState<any[]>([]);
   const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function fetchMates() {
-      const res = await fetch(`/api/mates?query=${query}`, { credentials: "include" });
+      setLoading(true);
+      const res = await fetch(`/api/mates?query=${query}&page=${page}&limit=10`, { credentials: "include" });
       const data = await res.json();
-      setMates(data.mates);
+      if (page === 1) {
+        setMates(data.mates);
+      } else {
+        setMates(prev => [...prev, ...data.mates]);
+      }
+      setHasMore(data.mates.length === 10);
+      setLoading(false);
     }
     fetchMates();
+  }, [query, page]);
+
+  useEffect(() => {
+    setPage(1);
   }, [query]);
 
   const calcAge = (dob: string) => {
     const birth = new Date(dob);
     const age = new Date().getFullYear() - birth.getFullYear();
     return age;
+  };
+
+  const loadMore = () => {
+    if (hasMore && !loading) {
+      setPage(prev => prev + 1);
+    }
   };
 
   console.log(mates);
@@ -59,6 +67,30 @@ export default function RenterHome({ userId }: { userId: string }) {
           </div>
         ))}
       </div>
+
+      {loading && (
+        <div className="text-center py-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading...</p>
+        </div>
+      )}
+
+      {hasMore && !loading && (
+        <div className="text-center py-4">
+          <button 
+            onClick={loadMore}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            Load More
+          </button>
+        </div>
+      )}
+
+      {!hasMore && mates.length > 0 && (
+        <div className="text-center py-4 text-gray-600">
+          No more mates available
+        </div>
+      )}
     </div>
   );
 }

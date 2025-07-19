@@ -55,6 +55,24 @@ const Navbar = () => {
 				</NavigationMenuList>
 			</NavigationMenu>
 
+			{/* Center: Navigation Links */}
+			{user && (
+				<NavigationMenu>
+					<NavigationMenuList>
+						{user.role === "RENTER" && (
+							<NavigationMenuItem>
+								<NavigationMenuLink 
+									href="/bookings" 
+									className="text-gray-700 hover:text-gray-900 hover:underline px-3 py-2 rounded-md text-sm font-medium"
+								>
+									My Bookings
+								</NavigationMenuLink>
+							</NavigationMenuItem>
+						)}
+					</NavigationMenuList>
+				</NavigationMenu>
+			)}
+
 			{/* Right: Profile Dropdown using NavigationMenu */}
 			<NavigationMenu>
 				<NavigationMenuList>
@@ -64,7 +82,7 @@ const Navbar = () => {
 							{user ? (
 								<div className="space-y-2">
 									<div>
-										<p className="font-semibold">{user.name}</p>
+										<p className="font-semibold">{user.firstName} {user.lastName}</p>
 										<p className="text-xs text-muted-foreground">{user.email}</p>
 									</div>
 									<button
