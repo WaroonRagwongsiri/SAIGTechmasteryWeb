@@ -21,7 +21,7 @@ const AuthPage = () => {
 		confirmPassword: "",
 		role: "RENTER",
 		dateOfBirth: "",
-		profilePhoto: "",
+		profilePhoto: "https://placehold.co/600x400", // default profile photo
 	});
 
 	const handleInputChange = (e: { target: { name: any; value: any } }) => {
@@ -111,10 +111,6 @@ const AuthPage = () => {
 			profilePhoto: "",
 		});
 	};
-
-	const home_botton = () => {
-		router.push("/");
-	}
 
 	return (
 		<div>
@@ -235,22 +231,6 @@ const AuthPage = () => {
 											value={formData.dateOfBirth}
 											onChange={handleInputChange}
 											className="w-full px-3 py-2 border border-gray-300 text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-											required
-										/>
-									</div>
-
-									{/* Profile Photo URL */}
-									<div>
-										<label className="block text-sm font-medium text-gray-700 mb-1">
-											Profile Photo URL
-										</label>
-										<input
-											type="url"
-											name="profilePhoto"
-											value={formData.profilePhoto}
-											onChange={handleInputChange}
-											className="w-full px-3 py-2 border border-gray-300 text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-											placeholder="https://res.cloudinary.com/..."
 											required
 										/>
 									</div>

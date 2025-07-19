@@ -33,6 +33,8 @@ export default function RenterHome({ userId }: { userId: string }) {
     return age;
   };
 
+  console.log(mates);
+
   return (
     <div className="p-4">
       <input

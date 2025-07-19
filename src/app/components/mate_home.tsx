@@ -50,9 +50,7 @@ export default function MateHome({ userId }: { userId: string }) {
 	}
 
 	return (
-		<div>
-			<Navbar />
-			<div className="p-4">
+		<div className="p-4">
 			<h2 className="text-2xl font-bold mb-4">Pending Requests</h2>
 			{bookings.map((b) => (
 				<div key={b.id} className="border p-4 mb-4 rounded shadow">
@@ -79,7 +77,6 @@ export default function MateHome({ userId }: { userId: string }) {
 					))}
 				</div>
 			)}
-			</div>
 		</div>
 	);
 }
