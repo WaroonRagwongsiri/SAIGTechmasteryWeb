@@ -2,65 +2,58 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../components/navbar";
 import { Clock, CheckCircle, XCircle, CreditCard, Calendar, User, DollarSign } from "lucide-react";
+import { useBookingsStore } from "@/stores";
 
-type Booking = {
+interface BookingMate {
+	firstName: string;
+	lastName: string;
+}
+
+interface BookingRenter {
+	firstName: string;
+	lastName: string;
+}
+
+interface Booking {
 	id: string;
 	activity: string;
 	date: string;
 	startTime: string;
 	endTime: string;
-	totalAmount: number;
-	status: string;
-	renter: {
-		firstName: string;
-		lastName: string;
-	};
-	mate: {
-		firstName: string;
-		lastName: string;
-	};
-};
+	totalAmount?: number;
+	status: 'PENDING' | 'CONFIRMED' | 'PAYMENT_PENDING' | 'COMPLETED' | 'CANCELLED';
+	createdAt?: string;
+	renter: BookingRenter;
+	mate?: BookingMate;
+}
 
 const BookingList = () => {
-	const [pendingBookings, setPendingBookings] = useState<Booking[]>([]);
-	const [paymentPendingBookings, setPaymentPendingBookings] = useState<Booking[]>([]);
-	const [confirmedBookings, setConfirmedBookings] = useState<Booking[]>([]);
-	const [completedBookings, setCompletedBookings] = useState<Booking[]>([]);
-	const [cancelledBookings, setCancelledBookings] = useState<Booking[]>([]);
-	const [loading, setLoading] = useState(true);
+	const { pendingBookings, paymentPendingBookings, confirmedBookings, completedBookings
+		, cancelledBookings, loadingStatuses, fetchBookingsByStatus } = useBookingsStore()
 
 	useEffect(() => {
-		async function fetchAllBookings() {
-			setLoading(true);
-			try {
-				// Fetch all bookings without status filter to get all statuses
-				const res = await fetch("/api/bookings", {
-					credentials: "include",
-				});
-				if (res.ok) {
-					const data = await res.json();
-					const bookings = data.bookings;
-					
-					// Separate bookings by status
-					setPendingBookings(bookings.filter((b: Booking) => b.status === 'PENDING'));
-					setPaymentPendingBookings(bookings.filter((b: Booking) => b.status === 'PAYMENT_PENDING'));
-					setConfirmedBookings(bookings.filter((b: Booking) => b.status === 'CONFIRMED'));
-					setCompletedBookings(bookings.filter((b: Booking) => b.status === 'COMPLETED'));
-					setCancelledBookings(bookings.filter((b: Booking) => b.status === 'CANCELLED'));
-				}
-			} catch (error) {
-				console.error("Error fetching bookings:", error);
-			} finally {
-				setLoading(false);
+		const fetchBookings = async () => {
+			if (pendingBookings.length === 0 && !loadingStatuses.has('PENDING')) {
+				await fetchBookingsByStatus('PENDING');
 			}
-		}
-
-		fetchAllBookings();
-	}, []);
-
+			if (paymentPendingBookings.length === 0 && !loadingStatuses.has('PAYMENT_PENDING')) {
+				await fetchBookingsByStatus('PAYMENT_PENDING');
+			}
+			if (confirmedBookings.length === 0 && !loadingStatuses.has('CONFIRMED')) {
+				await fetchBookingsByStatus('CONFIRMED');
+			}
+			if (completedBookings.length === 0 && !loadingStatuses.has('COMPLETED')) {
+				await fetchBookingsByStatus('COMPLETED');
+			}
+			if (cancelledBookings.length === 0 && !loadingStatuses.has('CANCELLED')) {
+				await fetchBookingsByStatus('CANCELLED');
+			}
+		};
+		fetchBookings();
+	}, [fetchBookingsByStatus]);
 	const getStatusBadge = (status: string) => {
 		const baseClasses = "inline-flex items-center px-3 py-1 rounded-full text-sm font-medium";
-		
+
 		switch (status) {
 			case 'PENDING':
 				return (
@@ -125,7 +118,7 @@ const BookingList = () => {
 				<h3 className="text-lg font-semibold text-gray-900">{booking.activity}</h3>
 				{getStatusBadge(booking.status)}
 			</div>
-			
+
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
 				<div className="flex items-center space-x-3">
 					<Calendar className="h-5 w-5 text-gray-400" />
@@ -134,7 +127,7 @@ const BookingList = () => {
 						<p className="text-gray-900">{formatDate(booking.date)}</p>
 					</div>
 				</div>
-				
+
 				<div className="flex items-center space-x-3">
 					<Clock className="h-5 w-5 text-gray-400" />
 					<div>
@@ -144,31 +137,31 @@ const BookingList = () => {
 						</p>
 					</div>
 				</div>
-				
+
 				<div className="flex items-center space-x-3">
 					<User className="h-5 w-5 text-gray-400" />
 					<div>
 						<p className="text-sm font-medium text-gray-500">Mate</p>
 						<p className="text-gray-900">
-							{booking.mate.firstName} {booking.mate.lastName}
+							{booking.mate?.firstName || 'N/A'} {booking.mate?.lastName || 'N/A'}
 						</p>
 					</div>
 				</div>
-				
+
 				<div className="flex items-center space-x-3">
 					<DollarSign className="h-5 w-5 text-gray-400" />
 					<div>
 						<p className="text-sm font-medium text-gray-500">Total Amount</p>
 						<p className="text-gray-900 font-semibold">
-							฿{booking.totalAmount.toFixed(2)}
+							฿{booking.totalAmount?.toFixed(2) || 'N/A'}
 						</p>
 					</div>
 				</div>
 			</div>
-			
+
 			{booking.status === 'PAYMENT_PENDING' && (
 				<div className="mt-4 pt-4 border-t">
-					<a 
+					<a
 						href={`/bookings/${booking.id}`}
 						className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
 					>
@@ -197,7 +190,7 @@ const BookingList = () => {
 		</div>
 	);
 
-	if (loading) {
+	if (loadingStatuses.size > 0) {
 		return (
 			<div>
 				<Navbar />
@@ -213,33 +206,33 @@ const BookingList = () => {
 			<Navbar />
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 				<h1 className="text-3xl font-bold text-gray-900 mb-8">My Bookings</h1>
-				
-				<BookingSection 
-					title="Pending Bookings" 
+
+				<BookingSection
+					title="Pending Bookings"
 					bookings={pendingBookings}
 					emptyMessage="No pending bookings"
 				/>
-				
-				<BookingSection 
-					title="Confirmed Bookings (Wait for Payment)" 
+
+				<BookingSection
+					title="Confirmed Bookings (Wait for Payment)"
 					bookings={paymentPendingBookings}
 					emptyMessage="No bookings waiting for payment"
 				/>
-				
-				<BookingSection 
-					title="Confirmed Bookings" 
+
+				<BookingSection
+					title="Confirmed Bookings"
 					bookings={confirmedBookings}
 					emptyMessage="No confirmed bookings"
 				/>
-				
-				<BookingSection 
-					title="Completed Bookings" 
+
+				<BookingSection
+					title="Completed Bookings"
 					bookings={completedBookings}
 					emptyMessage="No completed bookings"
 				/>
-				
-				<BookingSection 
-					title="Cancelled Bookings" 
+
+				<BookingSection
+					title="Cancelled Bookings"
 					bookings={cancelledBookings}
 					emptyMessage="No cancelled bookings"
 				/>

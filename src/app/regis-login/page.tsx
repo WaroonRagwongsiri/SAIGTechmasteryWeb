@@ -9,7 +9,6 @@ import {
 	NavigationMenuList,
 } from "@/components/ui/navigation-menu"
 import { useAuthStore } from "@/stores/authStore";
-import { log } from "console";
 
 const AuthPage = () => {
 	const router = useRouter();

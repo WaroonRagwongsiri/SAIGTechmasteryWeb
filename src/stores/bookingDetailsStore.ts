@@ -11,7 +11,7 @@ interface BookingDetailsMate {
 }
 
 interface BookingDetails {
-  id: string; // Changed from number to string for MongoDB ObjectId
+  id: string;
   activity: string;
   date: string;
   startTime: string;
