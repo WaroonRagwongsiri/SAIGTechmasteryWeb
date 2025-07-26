@@ -70,12 +70,12 @@ export async function GET(
       line_items: [
         {
           price_data: {
-            currency: 'usd',
+            currency: 'thb',
             product_data: {
               name: `Booking with ${booking.mate.firstName} ${booking.mate.lastName}`,
               description: `${booking.activity} on ${new Date(booking.date).toLocaleDateString()}`,
             },
-            unit_amount: Math.round(booking.totalAmount * 100), // Stripe uses cents
+            unit_amount: Math.round(booking.totalAmount * 100),
           },
           quantity: 1,
         },

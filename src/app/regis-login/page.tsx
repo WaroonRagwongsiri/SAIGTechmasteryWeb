@@ -8,9 +8,12 @@ import {
 	NavigationMenuLink,
 	NavigationMenuList,
 } from "@/components/ui/navigation-menu"
+import { useAuthStore } from "@/stores/authStore";
+import { log } from "console";
 
 const AuthPage = () => {
 	const router = useRouter();
+	const {login} = useAuthStore();
 	const [isLogin, setIsLogin] = useState(true);
 	const [showPassword, setShowPassword] = useState(false);
 	const [formData, setFormData] = useState({
@@ -91,6 +94,7 @@ const AuthPage = () => {
 
 				localStorage.setItem("token", data.token);
 
+				login()
 				router.push("/");
 			} catch (err) {
 				alert(err);
