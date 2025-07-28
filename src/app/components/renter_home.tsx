@@ -70,6 +70,9 @@ export default function RenterHome({ userId }: { userId: string }) {
 						<p>Age: {calcAge(mate.user.dateOfBirth)}</p>
 						<p className="text-gray-700">{mate.bio}</p>
 						<p className="mt-2 text-green-600">฿{mate.hourlyRate}/hr</p>
+						<p className="text-gray-700 leading-relaxed">
+							⭐{mate.rating.toFixed(2) || 0.00.toFixed(2)} / 5.00
+						</p>
 						<a
 							href={`/mate/${mate.id}`}
 							className="mt-2 inline-block text-blue-500 underline"

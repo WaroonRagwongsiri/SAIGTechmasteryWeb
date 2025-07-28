@@ -14,21 +14,16 @@ import { useAuthStore } from "@/stores/authStore"
 
 const Navbar = () => {
 	const router = useRouter()
-	const { user, error,fetchUser, logout } = useAuthStore();
+	const { user,fetchUser, logout } = useAuthStore();
 
 	useEffect(() => {
-		if (error)
-		{
-			router.push("/regis-login");
-		}
 		if (!user) {
 			fetchUser();
 		}
-	}, [user, error,fetchUser]);
+	}, [user,fetchUser]);
 
 	const handleLogout = async () => {
 		logout()
-		router.push("/regis-login");
 	};
 
 	return (

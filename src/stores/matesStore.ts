@@ -13,6 +13,7 @@ interface Mate {
 	bio?: string;
 	hourlyRate: number;
 	user: MateUser;
+	rating: number;
 }
 
 interface MatesState {

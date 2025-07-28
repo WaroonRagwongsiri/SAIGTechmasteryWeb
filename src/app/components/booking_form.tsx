@@ -8,9 +8,10 @@ interface BookingFormProps {
   mateId: string;
   hourlyRate: number;
   mateName: string;
+  rating:	 number;
 }
 
-export default function BookingForm({ mateId, hourlyRate, mateName }: BookingFormProps) {
+export default function BookingForm({ mateId, hourlyRate, mateName, rating }: BookingFormProps) {
   const [formData, setFormData] = useState({
     activity: '',
     date: '',
