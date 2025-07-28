@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../components/navbar";
 import { Clock, CheckCircle, XCircle, CreditCard, Calendar, User, DollarSign } from "lucide-react";
 import { useBookingsStore } from "@/stores";
+import { useAuthStore } from "@/stores";
 
 interface BookingMate {
 	firstName: string;
@@ -28,8 +29,8 @@ interface Booking {
 }
 
 const BookingList = () => {
-	const { pendingBookings, paymentPendingBookings, confirmedBookings, completedBookings
-		, cancelledBookings, loadingStatuses, fetchBookingsByStatus } = useBookingsStore()
+	const { pendingBookings, paymentPendingBookings, confirmedBookings, completedBookings, cancelledBookings, loadingStatuses, fetchBookingsByStatus, removeCompletedBooking } = useBookingsStore();
+	const { user } = useAuthStore();
 
 	useEffect(() => {
 		const fetchBookings = async () => {
@@ -112,6 +113,35 @@ const BookingList = () => {
 		});
 	};
 
+	const [ratingStates, setRatingStates] = useState<{ [bookingId: string]: number }>({});
+	const [submitting, setSubmitting] = useState<{ [bookingId: string]: boolean }>({});
+
+	const handleRatingChange = (bookingId: string, value: number) => {
+		setRatingStates((prev) => ({ ...prev, [bookingId]: value }));
+	};
+
+	const handleSubmitRating = async (bookingId: string) => {
+		const rating = ratingStates[bookingId];
+		if (!rating) return;
+		setSubmitting((prev) => ({ ...prev, [bookingId]: true }));
+		try {
+			const res = await fetch(`/api/bookings/${bookingId}/rating`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ rating }),
+			});
+			if (res.ok) {
+				// Remove the booking from completedBookings
+				removeCompletedBooking(bookingId);
+				// Optionally show a success message
+			} else {
+				// Optionally handle error
+			}
+		} finally {
+			setSubmitting((prev) => ({ ...prev, [bookingId]: false }));
+		}
+	};
+
 	const BookingCard = ({ booking }: { booking: Booking }) => (
 		<div key={booking.id} className="bg-white border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
 			<div className="flex justify-between items-start mb-4">
@@ -168,6 +198,31 @@ const BookingList = () => {
 						<CreditCard className="w-4 h-4 mr-2" />
 						Complete Payment
 					</a>
+				</div>
+			)}
+			{booking.status === 'COMPLETED' && user?.role === 'RENTER' && (
+				<div className="mt-4 pt-4 border-t">
+					<p className="mb-2 font-medium">Rate your experience:</p>
+					<div className="flex items-center space-x-2 mb-2">
+						{[1,2,3,4,5].map((star) => (
+							<button
+								key={star}
+								type="button"
+								className={`text-2xl ${ratingStates[booking.id] >= star ? 'text-yellow-400' : 'text-gray-300'}`}
+								onClick={() => handleRatingChange(booking.id, star)}
+								aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
+							>
+								★
+							</button>
+						))}
+					</div>
+					<button
+						disabled={submitting[booking.id] || !ratingStates[booking.id]}
+						onClick={() => handleSubmitRating(booking.id)}
+						className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+					>
+						{submitting[booking.id] ? 'Submitting...' : 'Submit Rating'}
+					</button>
 				</div>
 			)}
 		</div>

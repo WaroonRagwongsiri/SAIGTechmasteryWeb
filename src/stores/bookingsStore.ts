@@ -42,6 +42,7 @@ interface BookingsActions {
 	removePendingBooking: (id: string) => void;
 	addConfirmedBooking: (booking: Booking) => void;
 	clearBookings: () => void;
+	removeCompletedBooking: (id: string) => void;
 }
 
 type BookingsStore = BookingsState & BookingsActions;
@@ -147,5 +148,11 @@ export const useBookingsStore = create<BookingsStore>((set, get) => ({
 			pendingBookings: [],
 			confirmedBookings: []
 		});
+	},
+
+	removeCompletedBooking: (id) => {
+		set((state) => ({
+			completedBookings: state.completedBookings.filter((b) => b.id !== id)
+		}));
 	},
 })); 
