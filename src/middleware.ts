@@ -27,7 +27,7 @@ export const config = {
 		"/api/bookings/:path*",
 		"/api/checkout/:path*",
 		"/api/logout",
-		"api/mate-profile",
+		"/api/mate-profile",
 		"/api/mates",
 		"/api/mates/:path*",
 		"/api/rating/:path*",
