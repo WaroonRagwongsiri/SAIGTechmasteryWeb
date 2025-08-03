@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
-import jwt from "jsonwebtoken";
+import { jwtVerify } from "jose";
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
 	const token = request.cookies.get("token")?.value;
 
 	if (!token) {
@@ -9,27 +9,18 @@ export function middleware(request: NextRequest) {
 	}
 
 	try {
-		const payload = jwt.verify(token, process.env.JWT_SECRET!);
-		request.headers.set("x-user-id", (payload as any).sub);
+		const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
+		const { payload } = await jwtVerify(token, secret);
+
+		// Set user ID in headers (using 'id' field from your token)
+		request.headers.set("x-user-id", payload.id as string);
 		return NextResponse.next();
 	} catch (err) {
+		console.log("JWT verification failed:", err);
 		return NextResponse.redirect(new URL("/regis-login", request.url));
 	}
 }
 
 export const config = {
-	matcher: ["/bookings/:path*",
-		"/bookings",
-		"/mate/:path*",
-		"/profile",
-		"/mate",
-		"/api/bookings",
-		"/api/bookings/:path*",
-		"/api/checkout/:path*",
-		"/api/logout",
-		"/api/mate-profile",
-		"/api/mates",
-		"/api/mates/:path*",
-		"/api/rating/:path*",
-	]
+	matcher: ["/", "/bookings", "/bookings/:path*", "/mate", "/mate/:path*", "/profile"],
 };
