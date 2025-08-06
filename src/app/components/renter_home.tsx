@@ -12,7 +12,9 @@ export default function RenterHome({ userId }: { userId: string }) {
 		hasMore,
 		minRate,
 		maxRate,
+		minRating,
 		setRateRange,
+		setMinRating,
 	} = useMatesStore();
 
 	useEffect(() => {
@@ -22,6 +24,10 @@ export default function RenterHome({ userId }: { userId: string }) {
 	useEffect(() => {
 		fetchMates(query, true);
 	}, [minRate, maxRate]);
+
+	useEffect(() => {
+		fetchMates(query, true);
+	}, [setMinRating]);
 
 	const calcAge = (dob: string) => {
 		const birth = new Date(dob);
@@ -52,6 +58,12 @@ export default function RenterHome({ userId }: { userId: string }) {
 					onChange={(e) =>
 						setRateRange(minRate, Number(e.target.value) || Infinity)
 					}
+				/>
+				<input
+					type="number"
+					placeholder="Min rating"
+					className="border p-2 w-full"
+					onChange={(e) => setMinRating(Number(e.target.value) || 0)}
 				/>
 			</div>
 

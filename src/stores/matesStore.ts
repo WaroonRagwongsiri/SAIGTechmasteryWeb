@@ -26,6 +26,7 @@ interface MatesState {
 	limit: number;
 	minRate: number;
 	maxRate: number;
+	minRating: number;
 }
 
 interface MatesActions {
@@ -37,6 +38,7 @@ interface MatesActions {
 	setError: (error: string | null) => void;
 	clearError: () => void;
 	clearMates: () => void;
+	setMinRating: (min: number) => void;
 }
 
 type MatesStore = MatesState & MatesActions;
@@ -52,10 +54,15 @@ export const useMatesStore = create<MatesStore>((set, get) => ({
 	limit: 10,
 	minRate: 0,
 	maxRate: Infinity,
-  
+	minRating: 0,
+
 	setRateRange: (min, max) => {
-	  set({ minRate: min, maxRate: max });
-	},  
+		set({ minRate: min, maxRate: max });
+	},
+
+	setMinRating: (min: number) => {
+		set({ minRating: min });
+	},
 
 	// Actions
 	fetchMates: async (query = '', reset = true) => {
@@ -64,9 +71,10 @@ export const useMatesStore = create<MatesStore>((set, get) => ({
 
 		set({ loading: true, error: null });
 		try {
-			const res = await fetch(`/api/mates?query=${encodeURIComponent(query)}&page=${page}&limit=${state.limit}&minRate=${state.minRate}&maxRate=${state.maxRate}`, { 
-				credentials: 'include' 
-			  });			  
+			const res = await fetch(
+				`/api/mates?query=${encodeURIComponent(query)}&page=${page}&limit=${state.limit}&minRate=${state.minRate}&maxRate=${state.maxRate}&minRating=${state.minRating}`,
+				{ credentials: 'include' }
+			);
 
 			if (res.ok) {
 				const data = await res.json();
@@ -77,19 +85,13 @@ export const useMatesStore = create<MatesStore>((set, get) => ({
 					loading: false,
 					searchQuery: query,
 					page: page + 1,
-					hasMore: data.mates.length === state.limit
+					hasMore: data.mates.length === state.limit,
 				});
 			} else {
-				set({
-					error: 'Failed to fetch mates',
-					loading: false
-				});
+				set({ error: 'Failed to fetch mates', loading: false });
 			}
 		} catch (error) {
-			set({
-				error: 'Failed to fetch mates',
-				loading: false
-			});
+			set({ error: 'Failed to fetch mates', loading: false });
 		}
 	},
 
@@ -97,15 +99,14 @@ export const useMatesStore = create<MatesStore>((set, get) => ({
 		const state = get();
 		if (!state.hasMore || state.loading) return;
 
-		// Call fetchMates directly with current search query and reset=false
 		const page = state.page;
-
 		set({ loading: true, error: null });
+
 		try {
-			const res = await fetch(`/api/mates?query=${encodeURIComponent(state.searchQuery)}&page=${page}&limit=${state.limit}&minRate=${state.minRate}&maxRate=${state.maxRate}`, { 
-				credentials: 'include' 
-			  });
-			  
+			const res = await fetch(
+				`/api/mates?query=${encodeURIComponent(state.searchQuery)}&page=${page}&limit=${state.limit}&minRate=${state.minRate}&maxRate=${state.maxRate}&minRating=${state.minRating}`,
+				{ credentials: 'include' }
+			);
 
 			if (res.ok) {
 				const data = await res.json();
@@ -115,19 +116,13 @@ export const useMatesStore = create<MatesStore>((set, get) => ({
 					mates: newMates,
 					loading: false,
 					page: page + 1,
-					hasMore: data.mates.length === state.limit
+					hasMore: data.mates.length === state.limit,
 				});
 			} else {
-				set({
-					error: 'Failed to fetch mates',
-					loading: false
-				});
+				set({ error: 'Failed to fetch mates', loading: false });
 			}
 		} catch (error) {
-			set({
-				error: 'Failed to fetch mates',
-				loading: false
-			});
+			set({ error: 'Failed to fetch mates', loading: false });
 		}
 	},
 
